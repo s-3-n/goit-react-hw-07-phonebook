@@ -1,33 +1,58 @@
+import PropTypes from 'prop-types';
+import {
+  ContactsList,
+  ConctactListItem,
+  DeleteButton,
+} from './ContactList.styled';
 import { useDispatch, useSelector } from 'react-redux';
-import { useEffect } from 'react';
+import { getContacts, getFilter } from 'redux/selectors';
+import { deleteContact } from 'redux/operations';
 
-import { BtnStyled } from 'components/ContactForm/ContactForm.styled';
-import { ItemStyled, ListStyled } from './ContactList.styled';
-import { getContact, removeContact } from 'redux/contactsOperations';
-import { selectIsContacts, showFilteredContacts } from 'redux/contactsSelector';
 
 const ContactList = () => {
+  const contacts = useSelector(getContacts);
+  const filtered = useSelector(getFilter);
   const dispatch = useDispatch();
-  const isContacts = useSelector(selectIsContacts);
 
-  useEffect(() => {
-    !isContacts && dispatch(getContact());
-  }, [dispatch, isContacts]);
+  const filteredContacts = (() => {
+    const normalizedFilter = filtered.toLowerCase();
+    return contacts.filter(({ name }) =>
+      name.toLowerCase().includes(normalizedFilter)
+    );
+  })();
 
-  const renderContacts = useSelector(showFilteredContacts);
+
 
   return (
-    <ListStyled>
-      {renderContacts.map(el => (
-        <ItemStyled key={el.id}>
-          {el.name}: {el.number}
-          <BtnStyled onClick={() => dispatch(removeContact(el.id))}>
-            Delete
-          </BtnStyled>
-        </ItemStyled>
-      ))}
-    </ListStyled>
+    <>
+      <ContactsList>
+        {filteredContacts.map(contact => (
+          <ConctactListItem key={contact.id}>
+            {contact.name}: {contact.number}
+            <DeleteButton
+              type="button"
+              onClick={() => {
+                dispatch(deleteContact(contact.id));
+              }}
+            >
+              Delete
+            </DeleteButton>
+          </ConctactListItem>
+        ))}
+      </ContactsList>
+    </>
   );
+};
+
+ContactList.propTypes = {
+  contacts: PropTypes.arrayOf(
+    PropTypes.exact({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      number: PropTypes.string.isRequired,
+    })
+  ),
+  deleteContact: PropTypes.func,
 };
 
 export default ContactList;

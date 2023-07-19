@@ -1,53 +1,45 @@
 import styled from 'styled-components';
+import { Form } from 'formik';
 
-export const FormStyled = styled.form`
+export const StyledForm = styled(Form)`
   display: flex;
   flex-direction: column;
-  width: 400px;
-  padding: 10px;
-  border: solid #cccccc;
+  padding: 20px 20px;
+  border: 2px solid black;
+  max-width: 480px;
+  margin-bottom: 30px;
 `;
 
-export const LabelStyled = styled.label`
-  display: contents;
-  margin: 0;
+export const Label = styled.label`
+  display: flex;
+  flex-direction: column;
   font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 30px;
 `;
 
-export const InputStyled = styled.input`
-  margin-bottom: 10px;
-  padding: 5px;
-  font-size: 20px;  
-`;
-
-export const BtnStyled = styled.button`
-  display: inline-block;
-  padding: 8px 16px;
-  margin: 0 20px;
+export const Input = styled.input`
+  max-width: 240px;
+  height: 24px;
   font-size: 16px;
-  background-color: #4caf50;
-  color: #ffffff;
-  border: none;
+  outline-color: skyblue;
+`;
+
+export const Span = styled.span`
+  padding-bottom: 10px;
+`;
+
+export const Button = styled.button`
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 28px;
+  max-width: 125px;
+  font-weight: 600;
+  font-size: 14px;
+  outline: none;
+  border: 1px solid skyblue;
   border-radius: 4px;
-  cursor: pointer;
-
-  &:hover {
-    background-color: #45a049;
-  }
-`;
-
-export const TitleStyled = styled.h1`
-  margin: 40px;
-  font-size: 40px;
-`;
-
-export const SubtitleStyled = styled.h2`
-  margin: 40px auto 0;
-  font-size: 36px;
-`;
-
-export const CaptionFStyled = styled.h3`
-  margin: 20px auto;
-  font-size: 28px;
-  font-weight: 400;
 `;

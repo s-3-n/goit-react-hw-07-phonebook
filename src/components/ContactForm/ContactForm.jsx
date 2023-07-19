@@ -1,64 +1,83 @@
-import { useDispatch, useSelector } from 'react-redux';
-import { useState } from 'react';
-
+import PropTypes from 'prop-types';
 import {
-  FormStyled,
-  LabelStyled,
-  InputStyled,
-  BtnStyled,
+  FormInput,
+  FormInputLabel,
+  SubmitButton,
+  ErrMessage,
+  FormContact,
 } from './ContactForm.styled';
-import { addContact } from 'redux/contactsOperations';
+import { nanoid } from 'nanoid';
+import { Formik } from 'formik';
+import * as yup from 'yup';
+import { useDispatch, useSelector } from 'react-redux';
+import { addContact } from 'redux/operations';
+import { getContacts } from 'redux/selectors';
 
 const ContactForm = () => {
-  const contacts = useSelector(state => state.contacts);
+  const nameID = nanoid();
+  const numberID = nanoid();
+  const contacts = useSelector(getContacts);
   const dispatch = useDispatch();
-  const [form, setForm] = useState({
+
+  const initialValues = {
     name: '',
     number: '',
+  };
+
+  const validationSchema = yup.object().shape({
+    name: yup
+      .string()
+      .matches(
+        "^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$",
+        "Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
+      )
+      .required(),
+    number: yup
+      .string()
+      .matches(
+        '^[+]?[(]?[0-9]{1,4}[)]?[-s.]?[0-9]{1,4}[-s.]?[0-9]{1,6}$',
+        'Phone number must be digits and can contain spaces, dashes, parentheses and can start with +'
+      )
+      .required(),
   });
 
-  const handleChange = e => {
-    const { name, value } = e.target;
-    setForm(prevForm => ({ ...prevForm, [name]: value }));
-  };
+  const handlerFormSubmit = ({ name, number }, actions) => {
+    const nameNormalized = name.toLowerCase();
 
-  const handleSubmit = e => {
-    const name = e.target.name.value;
-    e.preventDefault();
-    if (contacts.some(el => el.name.toLowerCase() === name.toLowerCase())) {
-      return alert(`${name} is already in contacts.`);
+    const isNameAlreadyInContacts = contacts.find(
+      contact => contact.name.toLowerCase() === nameNormalized
+    );
+
+    if (isNameAlreadyInContacts) {
+      alert(`${name} is already in contacts.`);
+      return;
     }
-    dispatch(addContact(form));
-    e.target.reset();
+    dispatch(addContact({name, number}));
+    actions.resetForm();
   };
-
   return (
-    <FormStyled onSubmit={handleSubmit}>
-      <LabelStyled>
-        Name
-        <InputStyled
-          type="text"
-          name="name"
-          pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
-          title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
-          required
-          onChange={handleChange}
-        />
-      </LabelStyled>
-      <LabelStyled>
-        Number
-        <InputStyled
-          type="tel"
-          name="number"
-          pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
-          title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
-          required
-          onChange={handleChange}
-        />
-        <BtnStyled type="submit">Add contact</BtnStyled>
-      </LabelStyled>
-    </FormStyled>
+    <Formik
+      initialValues={initialValues}
+      validationSchema={validationSchema}
+      onSubmit={handlerFormSubmit}
+    >
+      <FormContact autoComplete="off">
+        <FormInputLabel htmlFor={nameID}>Name</FormInputLabel>
+        <FormInput type="text" name="name" id={nameID} />
+        <ErrMessage name="name" component="div" />
+
+        <FormInputLabel htmlFor={numberID}>Number</FormInputLabel>
+        <FormInput type="text" name="number" id={numberID} />
+        <ErrMessage name="number" component="div" />
+
+        <SubmitButton type="submit">Add contact</SubmitButton>
+      </FormContact>
+    </Formik>
   );
+};
+
+ContactForm.propTypes = {
+  onSubmit: PropTypes.func,
 };
 
 export default ContactForm;
